@@ -1,0 +1,33 @@
+{
+  "mver": "1.2.0",
+  "control": {
+    "identity": {
+      "name": "CWCBase3D",
+      "version": "1.0",
+      "displayname": "CWC Base 3D",
+      "icon": "./assets/3d.png",
+      "type": "guid://00bd2ed4-56cf-49ef-aeac-6c7454f5abd7",
+      "start": "./control/index.html"
+    },
+    "environment": {
+      "extensions": {
+        "HMI": {
+          "mandatory": true,
+          "version": "~1.0.0"
+        }
+      }
+    },
+    "metadata": {
+      "author": "Marco Buffa"
+    },
+    "contracts": {
+      "api": {
+        "methods": {},
+        "events": {},
+        "properties": {}
+      }
+    },
+    "types": {}
+  }
+}
+  

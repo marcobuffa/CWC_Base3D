@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Basic 3D Control</title>
+        <link rel="stylesheet" href="style.css">
+    
+        <script src="js/three.js"></script>
+        <script src="js/GLTFLoader.js"></script>
+        <script src="js/OrbitControls.js"></script>
+    
+        <script src="js/webcc.min.js"></script>
+    </head>
+    
+    <body>
+        <div id="container"></div>
+
+        <script type="module">
+            var wincc = false;
+            var camera, scene, light1, light2, light3, renderer, controls, container, Loader;
+
+            function initThreejs() {
+                container = document.getElementById("container");
+                renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setClearColor(0x000000);
+        
+                window.addEventListener(
+                    "resize",
+                    function() {
+                        camera.aspect = window.innerWidth / window.innerHeight;
+                        camera.updateProjectionMatrix();
+                        renderer.setSize(window.innerWidth, window.innerHeight);
+                    },
+                    false
+                );
+                container.appendChild(renderer.domElement);
+                
+                //impostazioni camera di scena
+                camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, .01, 1000);
+                camera.position.set(.7, .4, .7);
+                camera.lookAt(0, 0, 0);
+        
+                //creazione scena
+                scene = new THREE.Scene();
+                
+                //creazione assi
+                //scene.add(new THREE.AxesHelper(.1));
+        
+                //aggiunta luci (2 direzionali e una ambientale)
+                light1 = new THREE.DirectionalLight(0xffffff, 4);
+                light1.position.set(1, 1, -1);
+                scene.add(light1);
+        
+                light2 = new THREE.DirectionalLight(0xffffff, 4);
+                light2.position.set(-1, -1, 1);
+                scene.add(light2);
+        
+                light3 = new THREE.AmbientLight(0xffffff, 4);
+                scene.add(light3);
+                
+                //impostazione controlli (possibilità di "muovere il modello")
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.update();
+
+                //caricamento modello meccanico
+                Loader = new THREE.GLTFLoader();
+                Loader.load('model/MTP1000.glb', function(gltf){
+                    //console.log(gltf);
+                    scene.add(gltf.scene);
+                })
+
+                animate();
+            };
+    
+            function animate() {
+                requestAnimationFrame( animate );
+                controls.update();
+                renderer.render( scene, camera );
+            }
+
+            //callback ricezione nuovi valori da WinCC --> viene richiamata quando da WinCC arrivano dei nuovi dati
+			function dataFromWinCC(data){
+				console.log(data);
+			}
+    
+            //funzione per attivare la comunicazione con WinCC
+			WebCC.start(
+				function(result) {
+					if (result) {
+						console.log("I'm in WinCC :-)");
+						if (WebCC.isDesignMode) { //se sei in ingegneria NON disegnare il modello per non sovraccaricare il rendering della pagina in TIA Portal
+							document.getElementById('container').innerHTML="<p>Believe me: this is a 3D container who doesn't kill TIA Portal :-)</p>";
+						} else { //se sei in runtime
+							wincc = true; //porta a true la variabile di stato di connessione con WinCC
+							initThreejs(); //inizializza la scena
+							try {
+								WebCC.onPropertyChanged.subscribe(dataFromWinCC); //sottoscrivi le modifiche dei dati da WinCC
+							} catch (error) {
+								console.log(error);
+							}
+						}
+					} else { //se sei in un browser
+						console.log("Let me alone: I'm not in WinCC :-(");
+						initThreejs(); //inizializza la scena
+					}
+				},
+				{
+					methods: {
+						ResetView: function(){
+                            controls.reset(); //rimetti la camera nella posizione iniziale
+                        },
+						MoveCamera: function(targetPosition){
+							moveCamera(JSON.parse(targetPosition)); //sposta la camera in una posizione specifica
+						}
+					},
+					events: [], //al momento nessun evento
+					properties: {}
+				},
+				["HMI"],
+				10000 //tempo massimo per caricare il modello in millisecondi... potrebbero esserne necessari di più per modelli complessi
+			);
+    
+        </script>
+    </body>
+</html>
