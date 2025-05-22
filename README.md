@@ -27,7 +27,7 @@
 7. Enjoy
 
 ## How to directly download this CWC (if you are in a hurry):
-1. Download from [here](build/{00bd2ed4-56cf-49ef-aeac-6c7454f5abd7}.zip)
+1. Download from [here](build/{00bd2ed4-56cf-49ef-aeac-6c7454f5abd7}.zip?raw=true)
 2. Copy the **{00bd2ed4-56cf-49ef-aeac-6c7454f5abd7}.zip** file in **C:\Program Files\Siemens\Automation\Portal Vxx\Data\Hmi\CustomControls** folder
 3. (Re)start TIA Portal
 4. Drag your new 3D CWC from the **My Controls** right side pane in a WinCC Unified screen
